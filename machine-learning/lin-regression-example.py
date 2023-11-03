@@ -57,7 +57,7 @@ y = np.array([1,2,3])
 theta = np.array([0,0])
 
 thread = Thread(target=task)
-print("Now start the least square task")
+print("Now start the gradient descent task")
 thread.start()
 
 print("Plot the resulting linear line")

@@ -4,7 +4,7 @@ file_name = 'output.json'
 
 # Opening the file in write mode
 with open(file_name, 'wb') as f:
-    
+
     # Creating a Curl instance
     c = Curl()
 
@@ -20,4 +20,3 @@ with open(file_name, 'wb') as f:
     c.close()
 
     print(f'Wrote output to {file_name}')
-
