@@ -25,10 +25,9 @@ def task():
   global trainings_set
   global y
 
-  for i in range(100):
+  while True:
       if ui_terminated:
           break
-
       delta = np.array([
           h(theta, trainings_set[0]) - y[0],
           h(theta, trainings_set[1]) - y[1],
@@ -49,7 +48,7 @@ def task():
       sleep(0.5)
   print("worker thread finished")
 
-alpha = 0.3
+alpha = 0.1
 trainings_set = np.array([
     [1,1],
     [1,2],
