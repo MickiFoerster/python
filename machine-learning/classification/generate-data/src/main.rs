@@ -3,6 +3,7 @@ use rand::Rng;
 fn main() {
     let mut rng = rand::thread_rng();
 
+    println!(r#""x", "y""#);
     let mut counter = 0;
     loop {
         let rand_sample = rng.gen_range(0.0..1.0);
