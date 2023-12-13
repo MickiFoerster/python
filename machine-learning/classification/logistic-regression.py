@@ -10,7 +10,8 @@ def sigmoid(x):
 
 def h(theta, x):
     theta_dot_x = np.dot(theta, x)
-    sigmoid(theta_dot_x)
+
+    return sigmoid(theta_dot_x)
 
 
 # Likelihood: 
@@ -23,11 +24,10 @@ def h(theta, x):
 #
 # log L(theta) = Sum_(i=0)^(n) y^(i) * log(h(x^(i))) + (1-y^(i)) * log(1-h(x^(i))
 
-def likelihood(y, theta, x):
-    m = len(y)
+def likelihood(y, theta, A):
     prod = 1.
-    for i in range(0..m):
-        prod *= h(x)**(y[i]) * (1-h(x))**(1-y[i])
+    for i in range(0, len(y)):
+        prod *= h(theta, A[i])**(y[i]) * (1-h(theta, A[i]))**(1-y[i])
 
     return prod
 
@@ -53,9 +53,59 @@ def read_input():
 
     return (A, y)
 
+def derivative_with_respect_to_theta_j(theta, A, y, j):
+    sum = 0
+    for i in range(0, len(y)):
+        x = A[i]
+        h_value = h(theta, x)
+        #log.debug(f"h(x): {h_value}")
+        sum += (y[i] - h_value) * x[j]
+
+    log.debug(sum)
+
+    return sum
+
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     log = logging.getLogger(__name__)
 
     log.info('reading input')
     A, y = read_input()
+
+    theta = np.array([0, 0])
+    alpha = 0.01
+
+    l = likelihood(y, theta, A)
+    print(l)
+    print(theta)
+
+    new_theta = np.array([0, 0])
+    for j in [0, 1]:
+        sum = derivative_with_respect_to_theta_j(theta, A, y, 0)
+        new_theta[j] = theta[j] + alpha * sum
+
+    theta = new_theta
+    l = likelihood(y, theta, A)
+    print(l)
+    print(theta)
+
+    for j in [0, 1]:
+        sum = derivative_with_respect_to_theta_j(theta, A, y, 0)
+        new_theta[j] = theta[j] + alpha * sum
+
+    theta = new_theta
+    l = likelihood(y, theta, A)
+    print(l)
+    print(theta)
+
+    for j in [0, 1]:
+        sum = derivative_with_respect_to_theta_j(theta, A, y, 0)
+        new_theta[j] = theta[j] + alpha * sum
+
+    theta = new_theta
+    l = likelihood(y, theta, A)
+    print(l)
+    print(theta)
+
+
