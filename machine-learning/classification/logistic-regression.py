@@ -14,6 +14,23 @@ def h(theta, x):
     return sigmoid(theta_dot_x)
 
 
+class MaxLikelihoodFile:
+    def __init__(self, filename):
+        self.file = open(filename, "w")
+
+    def __enter__(self):
+        return self.file
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.file.close()
+
+    def __del__(self):
+        # Destructor to ensure the file is closed if not explicitly closed
+        if hasattr(self, 'file') and self.file:
+            self.file.close()
+
+
+
 # Likelihood: 
 #
 # L(theta) = P( y | x; theta ) 
@@ -32,12 +49,12 @@ def likelihood(y, theta, A):
     return prod
 
 def log_likelihood(y, theta, x):
-    m = len(y)
     sum = 0.
-    for i in range(0..m):
-        sum += y[i]*math.log(h(x)) + (1-y[i]) * math.log(1-h(x))
+    for i in range(0, len(y)):
+        x = A[i]
+        sum += y[i] * math.log( h(theta, x) ) + (1-y[i]) * math.log( 1-h(theta, x) )
 
-    return prod
+    return sum
 
 
 def read_input():
@@ -58,12 +75,54 @@ def derivative_with_respect_to_theta_j(theta, A, y, j):
     for i in range(0, len(y)):
         x = A[i]
         h_value = h(theta, x)
+        #log.debug(f"theta: {theta}")
+        #log.debug(f"x: {x}")
         #log.debug(f"h(x): {h_value}")
+        #log.debug(f"x_j: {x[j]}")
+        #log.debug(f"y: {y[i]}")
         sum += (y[i] - h_value) * x[j]
+        #log.debug(f"sum: {sum}")
 
     log.debug(sum)
 
     return sum
+
+def batch_gradient_descent(theta, A, y):
+    with MaxLikelihoodFile("max-likelihood_gradient_descent.log") as log_file:
+        counter = 1
+
+        l = log_likelihood(y, theta, A)
+        log_file.write(f"{l}\n")
+        old_likelihood = l
+
+        while True:
+            new_theta = np.array([0, 0])
+            for j in [0, 1]:
+                deriv = derivative_with_respect_to_theta_j(theta, A, y, j)
+                new_theta[j] = theta[j] + alpha * deriv
+
+            # stop when theta converges
+            if np.array_equal(theta, new_theta):
+                log.info("no difference in new theta value, so stop gradient descent")
+                break
+
+            theta = new_theta
+            log.debug("new theta: {:.2f}, {:.2f}".format(theta[0], theta[1]))
+
+            old_likelihood = l
+            l = log_likelihood(y, theta, A)
+            if old_likelihood >= l:
+                log.info("likelihood is not increasing, so stop minimizing process")
+                break
+
+            log.debug(f"likelihood: {l}")
+            log_file.write(f"{l}\n")
+
+            counter += 1
+
+        print(f"Batch Gradient descent converged after {counter} iterations with value: {theta}")
+
+        return theta
 
 
 if __name__ == "__main__":
@@ -73,39 +132,13 @@ if __name__ == "__main__":
     log.info('reading input')
     A, y = read_input()
 
-    theta = np.array([0, 0])
+    theta = np.array([1, 1])
     alpha = 0.01
 
-    l = likelihood(y, theta, A)
-    print(l)
-    print(theta)
-
-    new_theta = np.array([0, 0])
-    for j in [0, 1]:
-        sum = derivative_with_respect_to_theta_j(theta, A, y, 0)
-        new_theta[j] = theta[j] + alpha * sum
-
-    theta = new_theta
-    l = likelihood(y, theta, A)
-    print(l)
-    print(theta)
-
-    for j in [0, 1]:
-        sum = derivative_with_respect_to_theta_j(theta, A, y, 0)
-        new_theta[j] = theta[j] + alpha * sum
-
-    theta = new_theta
-    l = likelihood(y, theta, A)
-    print(l)
-    print(theta)
-
-    for j in [0, 1]:
-        sum = derivative_with_respect_to_theta_j(theta, A, y, 0)
-        new_theta[j] = theta[j] + alpha * sum
-
-    theta = new_theta
-    l = likelihood(y, theta, A)
-    print(l)
-    print(theta)
+    print(A)
+    tmp_theta = theta.copy()
+    tmp_theta = batch_gradient_descent(theta, A, y)
+    print("Batch gradient descent solution: theta = [{}, {}]"
+          .format(tmp_theta[0], tmp_theta[1]))
 
 
