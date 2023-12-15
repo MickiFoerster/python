@@ -4,6 +4,9 @@ import numpy as np
 import pandas as pd
 import logging
 
+alpha = 0.001
+theta = np.array([1, 1, 1])
+
 def sigmoid(x):
     d = 1 + math.exp(-x)
     return 1 / d
@@ -64,9 +67,13 @@ def read_input():
 
     # First column of feature matrice consists of ones
     first_column = np.ones(len(x))
-
+    
+    third_column = np.zeros(len(x))
+    for i in range(0, len(y)):
+        third_column[i] = x[i]
+    
     # feature matrix
-    A = np.stack((first_column, x), axis=1)
+    A = np.stack((first_column, x, third_column), axis=1)
 
     return (A, y)
 
@@ -87,7 +94,7 @@ def derivative_with_respect_to_theta_j(theta, A, y, j):
 
     return sum
 
-def batch_gradient_descent(theta, A, y):
+def batch_gradient_descent(alpha, theta, A, y):
     with MaxLikelihoodFile("max-likelihood_gradient_descent.log") as log_file:
         counter = 1
 
@@ -96,9 +103,10 @@ def batch_gradient_descent(theta, A, y):
         old_likelihood = l
 
         while True:
-            new_theta = np.array([0, 0])
-            for j in [0, 1]:
+            new_theta = np.array([1, 1, 1])
+            for j in range(0, len(theta)):
                 deriv = derivative_with_respect_to_theta_j(theta, A, y, j)
+                log.debug(f"alpha: {alpha}")
                 new_theta[j] = theta[j] + alpha * deriv
 
             # stop when theta converges
@@ -107,7 +115,7 @@ def batch_gradient_descent(theta, A, y):
                 break
 
             theta = new_theta
-            log.debug("new theta: {:.2f}, {:.2f}".format(theta[0], theta[1]))
+            log.debug("new theta: {}".format(theta))
 
             old_likelihood = l
             l = log_likelihood(y, theta, A)
@@ -132,13 +140,8 @@ if __name__ == "__main__":
     log.info('reading input')
     A, y = read_input()
 
-    theta = np.array([1, 1])
-    alpha = 0.01
-
-    print(A)
     tmp_theta = theta.copy()
-    tmp_theta = batch_gradient_descent(theta, A, y)
-    print("Batch gradient descent solution: theta = [{}, {}]"
-          .format(tmp_theta[0], tmp_theta[1]))
+    tmp_theta = batch_gradient_descent(alpha, theta, A, y)
+    print("Batch gradient descent solution: theta = {}" .format(tmp_theta))
 
 
