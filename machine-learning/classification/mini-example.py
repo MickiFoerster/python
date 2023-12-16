@@ -22,22 +22,47 @@ A = [
 print(A)
 print(y)
 
+def step(alpha, theta, A, y):
+    sum = 0.
+    for i in range(0, len(y)):
+        sum += (y[i] - h(theta, A[i]))
+    a = theta[0] + alpha * sum
+    sum = 0.
+    for i in range(0, len(y)):
+        sum += (y[i] - h(theta, A[i])) * A[i][1]
+    b = theta[1] + alpha * sum
+
+    return np.array([a, b])
+
+
+def likelihood(y, theta, A):
+    prod = 1.
+    for i in range(0, len(y)):
+        prod *= h(theta, A[i])**(y[i]) * (1-h(theta, A[i]))**(1-y[i])
+
+    return prod
+
+def log_likelihood(y, theta, A):
+    sum = 0.
+    for i in range(0, len(y)):
+        x = A[i]
+        sum += y[i] * math.log( h(theta, x) ) + (1-y[i]) * math.log( 1-h(theta, x) )
+
+    return sum
+
+
 alpha = 0.1
-theta = np.array([1, 1])
-t = np.array([0, 0])
-
-sum = 0.
-for i in range(0, len(y)):
-    print(A[i])
-    sum += (y[i] - h(theta, A[i]))
-t[0] = theta[0] + alpha * sum
-
-
-sum = 0.
-for i in range(0, len(y)):
-    print(A[i][1])
-    sum += (y[i] - h(theta, A[i])) * A[i][1]
-t[1] = theta[1] + alpha * sum
-
+theta = np.array([-1, -1])
 print(theta)
-print(t)
+print("log l(theta): {}".format(log_likelihood(y, theta, A)))
+
+for i in range(1, 100000):
+    t = step(alpha, theta, A, y)
+    theta = t
+    print(theta)
+    print("log l(theta): {}".format(log_likelihood(y, theta, A)))
+
+print(h(theta, A[0]))
+print(h(theta, A[1]))
+print(h(theta, A[2]))
+print(h(theta, A[3]))
