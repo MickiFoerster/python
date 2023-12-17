@@ -6,10 +6,10 @@ import logging
 import signal
 
 alpha = 2.0
-theta = np.array([-25.12191353,  50.40418354])
+theta = np.array([-25.79091995, 51.74219312])
 
 def signal_handler(sig, frame):
-    print("signal handler caught ctrl+c")
+    print(f"signal handler caught ctrl+c after {counter} iterations")
     print(f"last value of theta: {theta}")
     print("training data:")
     print(h(theta, A[0]))
@@ -99,7 +99,9 @@ def derivative_with_respect_to_theta_j(theta, A, y, j):
 
     return sum
 
-def batch_gradient_descent(alpha, theta, A, y):
+def batch_gradient_descent(alpha, A, y):
+    global theta
+
     with MaxLikelihoodFile("max-likelihood_gradient_descent.log") as log_file:
         counter = 1
 
@@ -127,7 +129,7 @@ def batch_gradient_descent(alpha, theta, A, y):
                 log.info("likelihood is not increasing, so stop minimizing process")
                 break
 
-            log.info(f"likelihood: {l}")
+            log.info(f"likelihood after {counter} iterations: {l}")
             log_file.write(f"{l}\n")
 
             counter += 1
@@ -153,8 +155,7 @@ if __name__ == "__main__":
     for i in range(0, len(theta)):
         assert type(theta[i]) == np.float64
 
-    tmp_theta = theta.copy()
-    tmp_theta = batch_gradient_descent(alpha, theta, A, y)
+    batch_gradient_descent(alpha, A, y)
     print("Batch gradient descent solution: theta = {}" .format(tmp_theta))
 
 
