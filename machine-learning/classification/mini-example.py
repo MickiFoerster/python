@@ -25,10 +25,12 @@ print(y)
 def step(alpha, theta, A, y):
     sum = 0.
     for i in range(0, len(y)):
+        deriv = (y[i] - h(theta, A[i]))
         sum += (y[i] - h(theta, A[i]))
     a = theta[0] + alpha * sum
     sum = 0.
     for i in range(0, len(y)):
+        deriv = (y[i] - h(theta, A[i])) * A[i][1]
         sum += (y[i] - h(theta, A[i])) * A[i][1]
     b = theta[1] + alpha * sum
 
@@ -56,7 +58,7 @@ theta = np.array([-1, -1])
 print(theta)
 print("log l(theta): {}".format(log_likelihood(y, theta, A)))
 
-for i in range(1, 100000):
+for i in range(1, 1000):
     t = step(alpha, theta, A, y)
     theta = t
     print(theta)

@@ -3,9 +3,26 @@ import sys
 import numpy as np
 import pandas as pd
 import logging
+import signal
 
-alpha = 0.1
-theta = np.array([-37.50500501,  74.36864551])
+alpha = 2.0
+theta = np.array([-25.12191353,  50.40418354])
+
+def signal_handler(sig, frame):
+    print("signal handler caught ctrl+c")
+    print(f"last value of theta: {theta}")
+    print("training data:")
+    print(h(theta, A[0]))
+    print(h(theta, A[1]))
+    print(h(theta, A[2]))
+    print(h(theta, A[3]))
+
+    print("new data: 0.2")
+    print(h(theta, np.array([1., 0.2])))
+    print("new data: 0.8")
+    print(h(theta, np.array([1., 0.8])))
+
+    sys.exit(0)
 
 def sigmoid(x):
     d = 1 + math.exp(-x)
@@ -61,7 +78,7 @@ def log_likelihood(y, theta, A):
 
 
 def read_input():
-    csv_data = pd.read_csv("data.csv")
+    csv_data = pd.read_csv("data.csv", dtype=np.float64)
     x = csv_data.iloc[:,  0].values
     y = csv_data.iloc[:, -1].values
 
@@ -106,13 +123,11 @@ def batch_gradient_descent(alpha, theta, A, y):
 
             old_likelihood = l
             l = log_likelihood(y, theta, A)
-            print(old_likelihood)
-            print(l)
-            #if old_likelihood >= l:
-            #    log.info("likelihood is not increasing, so stop minimizing process")
-            #    break
+            if old_likelihood >= l:
+                log.info("likelihood is not increasing, so stop minimizing process")
+                break
 
-            log.debug(f"likelihood: {l}")
+            log.info(f"likelihood: {l}")
             log_file.write(f"{l}\n")
 
             counter += 1
@@ -123,11 +138,20 @@ def batch_gradient_descent(alpha, theta, A, y):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     log = logging.getLogger(__name__)
+
+    signal.signal(signal.SIGINT, signal_handler)
 
     log.info('reading input')
     A, y = read_input()
+    for i in range(0, len(A)):
+        for j in range(0, len(A[i])):
+            assert type(A[i][j]) == np.float64
+    for i in range(0, len(y)):
+        assert type(y[i]) == np.float64
+    for i in range(0, len(theta)):
+        assert type(theta[i]) == np.float64
 
     tmp_theta = theta.copy()
     tmp_theta = batch_gradient_descent(alpha, theta, A, y)
