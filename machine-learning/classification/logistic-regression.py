@@ -9,7 +9,7 @@ alpha = 2.0
 theta = np.array([-25.79091995, 51.74219312])
 
 def signal_handler(sig, frame):
-    print(f"signal handler caught ctrl+c after {counter} iterations")
+    print("signal handler caught ctrl+c")
     print(f"last value of theta: {theta}")
     print("training data:")
     print(h(theta, A[0]))
