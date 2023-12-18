@@ -5,8 +5,8 @@ import pandas as pd
 import logging
 import signal
 
-alpha = 2.0
-theta = np.array([-25.79091995, 51.74219312])
+alpha = 13.8
+theta = np.array([-30.85873244, 61.87780892])
 
 def signal_handler(sig, frame):
     print("signal handler caught ctrl+c")
@@ -121,7 +121,6 @@ def batch_gradient_descent(alpha, A, y):
                 break
 
             theta = new_theta.copy()
-            log.debug("new theta: {}".format(theta))
 
             old_likelihood = l
             l = log_likelihood(y, theta, A)
@@ -129,7 +128,7 @@ def batch_gradient_descent(alpha, A, y):
                 log.info("likelihood is not increasing, so stop minimizing process")
                 break
 
-            log.info(f"likelihood after {counter} iterations: {l}")
+            log.info(f"new theta: {theta}, likelihood after {counter} iterations: {l}")
             log_file.write(f"{l}\n")
 
             counter += 1
