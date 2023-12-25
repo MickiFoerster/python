@@ -5,8 +5,8 @@ import pandas as pd
 import logging
 import signal
 
-alpha = 13.8
-theta = np.array([-30.85873244, 61.87780892])
+alpha = 0.1
+theta = np.array([-466.60366825, 1355.00942471, -965.20220283])
 
 def signal_handler(sig, frame):
     print("signal handler caught ctrl+c")
@@ -84,9 +84,14 @@ def read_input():
 
     # First column of feature matrice consists of ones
     first_column = np.ones(len(x))
+   
+    third_column = np.zeros(len(x))
+    for i in range(0, len(y)):
+        third_column[i] = x[i]**2
     
     # feature matrix
-    A = np.stack((first_column, x), axis=1)
+    #A = np.stack((first_column, x), axis=1)
+    A = np.stack((first_column, x, third_column), axis=1)
 
     return (A, y)
 
@@ -154,7 +159,7 @@ if __name__ == "__main__":
     for i in range(0, len(theta)):
         assert type(theta[i]) == np.float64
 
-    batch_gradient_descent(alpha, A, y)
+    tmp_theta = batch_gradient_descent(alpha, A, y)
     print("Batch gradient descent solution: theta = {}" .format(tmp_theta))
 
 

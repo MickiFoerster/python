@@ -9,9 +9,16 @@ import matplotlib.pyplot as plt
 fig = plt.figure()
 
 x = np.linspace(0, 1, 2)
+x = np.arange(0, 1, 0.1)
 print(x)
 
-y = np.array([-30.85873244, 61.87780892])
+def f(x):
+    theta = np.array([-141.70329858, 415.15121384, -297.95582757])
+    return theta[0]+theta[1]*x+theta[2]*x**2
+
+y = np.zeros(len(x))
+for i in range(0, len(x)):
+    y[i] = f(x[i])
 
 axes = fig.add_axes([0.1, 0.2, 0.6, 0.8])
 axes.plot(x, y, 'b')
