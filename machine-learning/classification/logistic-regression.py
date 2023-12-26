@@ -6,7 +6,8 @@ import logging
 import signal
 
 alpha = 0.1
-theta = np.array([-466.60366825, 1355.00942471, -965.20220283])
+#theta = np.array([-466.60366825, 1355.00942471, -965.20220283])
+theta = np.array([1., 1., 1.])
 
 def signal_handler(sig, frame):
     print("signal handler caught ctrl+c")
@@ -17,10 +18,10 @@ def signal_handler(sig, frame):
     print(h(theta, A[2]))
     print(h(theta, A[3]))
 
-    print("new data: 0.2")
-    print(h(theta, np.array([1., 0.2])))
-    print("new data: 0.8")
-    print(h(theta, np.array([1., 0.8])))
+    print("new data: 0.65")
+    print(h(theta, np.array([1., 0.65, 0.65**2])))
+    print("new data: 0.75")
+    print(h(theta, np.array([1., 0.75, 0.75**2])))
 
     sys.exit(0)
 
@@ -85,13 +86,22 @@ def read_input():
     # First column of feature matrice consists of ones
     first_column = np.ones(len(x))
    
-    third_column = np.zeros(len(x))
+    squared = np.zeros(len(x))
     for i in range(0, len(y)):
-        third_column[i] = x[i]**2
+        squared[i] = x[i]**2
+
+    cubic = np.zeros(len(x))
+    for i in range(0, len(y)):
+        cubic[i] = x[i]**3
+    
+    grade_four = np.zeros(len(x))
+    for i in range(0, len(y)):
+        grade_four[i] = x[i]**3
     
     # feature matrix
     #A = np.stack((first_column, x), axis=1)
-    A = np.stack((first_column, x, third_column), axis=1)
+    #A = np.stack((first_column, x, squared, cubic, grade_four), axis=1)
+    A = np.stack((first_column, x, squared), axis=1)
 
     return (A, y)
 
@@ -99,8 +109,20 @@ def derivative_with_respect_to_theta_j(theta, A, y, j):
     sum = 0
     for i in range(0, len(y)):
         x = A[i]
+        derivative_with_respect_to_theta_j = 0
+        if j == 0:
+            derivative_with_respect_to_theta_j = x[0]
+        elif j == 1:
+            derivative_with_respect_to_theta_j = x[1]
+        elif j == 2:
+            derivative_with_respect_to_theta_j = x[1]**2
+        #elif j == 3:
+        #    derivative_with_respect_to_theta_j = x[1]**3
+        #elif j == 4:
+        #    derivative_with_respect_to_theta_j = x[1]**4
+
         h_value = h(theta, x)
-        sum += (y[i] - h_value) * x[j]
+        sum += (y[i] - h_value) * derivative_with_respect_to_theta_j
 
     return sum
 
@@ -127,7 +149,7 @@ def batch_gradient_descent(alpha, A, y):
 
             theta = new_theta.copy()
 
-            old_likelihood = l
+            #old_likelihood = l
             l = log_likelihood(y, theta, A)
             if old_likelihood >= l:
                 log.info("likelihood is not increasing, so stop minimizing process")
