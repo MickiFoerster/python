@@ -114,8 +114,8 @@ def derivative_with_respect_to_theta_j(theta, A, y, j):
             derivative_with_respect_to_theta_j = x[0]
         elif j == 1:
             derivative_with_respect_to_theta_j = x[1]
-        elif j == 2:
-            derivative_with_respect_to_theta_j = x[1]**2
+        #elif j == 2:
+        #    derivative_with_respect_to_theta_j = x[1]**2
         #elif j == 3:
         #    derivative_with_respect_to_theta_j = x[1]**3
         #elif j == 4:
@@ -164,28 +164,80 @@ def batch_gradient_descent(alpha, A, y):
 
         return theta
 
-def Hessian(theta, x):
-    h_of_x_i = h(theta, x)
+def GradientMaxLikelihood(theta, A, y):
+    gradient = np.zeros(len(theta))
+
+    for j in range(0, 2):
+        sum = 0.
+        for i in range(0, len(theta)):
+            x = A[i]
+            h_of_x_i = h(theta, x)
+            sum += (y[i] - h_of_x_i) * x[j]
+
+        gradient[j] = sum
+
+    return gradient
+
+def Hessian(theta, A):
     sum = 0.
-    for i in range(0, len(x)):
+    for i in range(0, len(theta)):
+        x = A[i]
+        h_of_x_i = h(theta, x)
         sum += h_of_x_i * (1 - h_of_x_i) 
     h00 = -sum
 
     sum = 0.
-    for i in range(0, len(x)):
+    for i in range(0, len(theta)):
+        x = A[i]
+        h_of_x_i = h(theta, x)
         sum += h_of_x_i * (1 - h_of_x_i) * x[1]
     h01 = -sum
     h10 = h01
 
     sum = 0.
-    for i in range(0, len(x)):
+    for i in range(0, len(theta)):
+        x = A[i]
+        h_of_x_i = h(theta, x)
         sum += h_of_x_i * (1 - h_of_x_i) * x[1]**2
     h11 = -sum
 
     return np.array([
         [h00, h01], 
         [h10, h11],
-    ], np.float32)
+    ])
+
+def NewtonRaphson(theta, A, y):
+    with MaxLikelihoodFile("max-likelihood-newton.log") as log_file:
+        l = log_likelihood(y, theta, A)
+        log_file.write(f"{l}\n")
+
+        while True:
+            gradient = GradientMaxLikelihood(theta, A, y)
+
+            hessian = Hessian(theta, A)
+
+            b = np.subtract(hessian.dot(theta), gradient)
+            # solve linear system of equations
+            x = np.linalg.solve(hessian, b)
+
+            new_theta = x
+            old_l = l
+            l = log_likelihood(y, new_theta, A)
+            log_file.write(f"{l}\n")
+
+            if old_l >= l:
+                log.info(f"{theta}")
+                log.info(f"{new_theta}")
+                log.info(f"{old_l}")
+                log.info(f"{l}")
+                log.info(f"likelihood is not increasing anymore")
+                break
+
+            log.info(f"new theta: {new_theta}")
+            theta = new_theta
+
+        return new_theta
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
@@ -203,7 +255,9 @@ if __name__ == "__main__":
     for i in range(0, len(theta)):
         assert type(theta[i]) == np.float64
 
-    tmp_theta = batch_gradient_descent(alpha, A, y)
-    print("Batch gradient descent solution: theta = {}" .format(tmp_theta))
+    #tmp_theta = batch_gradient_descent(alpha, A, y)
+    #print("Batch gradient descent solution: theta = {}" .format(tmp_theta))
+
+    NewtonRaphson(theta, A, y)
 
 
