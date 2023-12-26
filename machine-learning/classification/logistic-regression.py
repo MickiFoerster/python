@@ -164,6 +164,28 @@ def batch_gradient_descent(alpha, A, y):
 
         return theta
 
+def Hessian(theta, x):
+    h_of_x_i = h(theta, x)
+    sum = 0.
+    for i in range(0, len(x)):
+        sum += h_of_x_i * (1 - h_of_x_i) 
+    h00 = -sum
+
+    sum = 0.
+    for i in range(0, len(x)):
+        sum += h_of_x_i * (1 - h_of_x_i) * x[1]
+    h01 = -sum
+    h10 = h01
+
+    sum = 0.
+    for i in range(0, len(x)):
+        sum += h_of_x_i * (1 - h_of_x_i) * x[1]**2
+    h11 = -sum
+
+    return np.array([
+        [h00, h01], 
+        [h10, h11],
+    ], np.float32)
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
