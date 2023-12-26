@@ -7,7 +7,7 @@ import signal
 
 alpha = 0.1
 #theta = np.array([-466.60366825, 1355.00942471, -965.20220283])
-theta = np.array([1., 1., 1.])
+theta = np.array([1., 1.])
 
 def signal_handler(sig, frame):
     print("signal handler caught ctrl+c")
@@ -86,22 +86,22 @@ def read_input():
     # First column of feature matrice consists of ones
     first_column = np.ones(len(x))
    
-    squared = np.zeros(len(x))
-    for i in range(0, len(y)):
-        squared[i] = x[i]**2
+    #squared = np.zeros(len(x))
+    #for i in range(0, len(y)):
+    #    squared[i] = x[i]**2
 
-    cubic = np.zeros(len(x))
-    for i in range(0, len(y)):
-        cubic[i] = x[i]**3
-    
-    grade_four = np.zeros(len(x))
-    for i in range(0, len(y)):
-        grade_four[i] = x[i]**3
+    #cubic = np.zeros(len(x))
+    #for i in range(0, len(y)):
+    #    cubic[i] = x[i]**3
+    #
+    #grade_four = np.zeros(len(x))
+    #for i in range(0, len(y)):
+    #    grade_four[i] = x[i]**3
     
     # feature matrix
     #A = np.stack((first_column, x), axis=1)
     #A = np.stack((first_column, x, squared, cubic, grade_four), axis=1)
-    A = np.stack((first_column, x, squared), axis=1)
+    A = np.stack((first_column, x), axis=1)
 
     return (A, y)
 
