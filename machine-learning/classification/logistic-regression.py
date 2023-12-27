@@ -11,6 +11,9 @@ theta = np.array([1., 1.])
 
 def signal_handler(sig, frame):
     print("signal handler caught ctrl+c")
+    print_summary_at_the_end()
+
+def print_summary_at_the_end():
     print(f"last value of theta: {theta}")
     print("training data:")
     print(h(theta, A[0]))
@@ -19,9 +22,9 @@ def signal_handler(sig, frame):
     print(h(theta, A[3]))
 
     print("new data: 0.65")
-    print(h(theta, np.array([1., 0.65, 0.65**2])))
+    print(h(theta, np.array([1., 0.65])))
     print("new data: 0.75")
-    print(h(theta, np.array([1., 0.75, 0.75**2])))
+    print(h(theta, np.array([1., 0.75])))
 
     sys.exit(0)
 
@@ -73,7 +76,11 @@ def log_likelihood(y, theta, A):
     sum = 0.
     for i in range(0, len(y)):
         x = A[i]
-        sum += y[i] * math.log( h(theta, x) ) + (1-y[i]) * math.log( 1-h(theta, x) )
+        h_theta_of_x = h(theta, x)
+        try:
+            sum += y[i] * math.log( h_theta_of_x ) + (1-y[i]) * math.log( 1-h_theta_of_x )
+        except:
+            print_summary_at_the_end()
 
     return sum
 
@@ -169,7 +176,7 @@ def GradientMaxLikelihood(theta, A, y):
 
     for j in range(0, 2):
         sum = 0.
-        for i in range(0, len(theta)):
+        for i in range(0, len(y)):
             x = A[i]
             h_of_x_i = h(theta, x)
             sum += (y[i] - h_of_x_i) * x[j]
@@ -180,14 +187,14 @@ def GradientMaxLikelihood(theta, A, y):
 
 def Hessian(theta, A):
     sum = 0.
-    for i in range(0, len(theta)):
+    for i in range(0, len(y)):
         x = A[i]
         h_of_x_i = h(theta, x)
         sum += h_of_x_i * (1 - h_of_x_i) 
     h00 = -sum
 
     sum = 0.
-    for i in range(0, len(theta)):
+    for i in range(0, len(y)):
         x = A[i]
         h_of_x_i = h(theta, x)
         sum += h_of_x_i * (1 - h_of_x_i) * x[1]
@@ -195,7 +202,7 @@ def Hessian(theta, A):
     h10 = h01
 
     sum = 0.
-    for i in range(0, len(theta)):
+    for i in range(0, len(y)):
         x = A[i]
         h_of_x_i = h(theta, x)
         sum += h_of_x_i * (1 - h_of_x_i) * x[1]**2
@@ -206,14 +213,15 @@ def Hessian(theta, A):
         [h10, h11],
     ])
 
-def NewtonRaphson(theta, A, y):
+def NewtonRaphson(A, y):
+    global theta
+
     with MaxLikelihoodFile("max-likelihood-newton.log") as log_file:
         l = log_likelihood(y, theta, A)
         log_file.write(f"{l}\n")
 
         while True:
             gradient = GradientMaxLikelihood(theta, A, y)
-
             hessian = Hessian(theta, A)
 
             b = np.subtract(hessian.dot(theta), gradient)
@@ -226,11 +234,7 @@ def NewtonRaphson(theta, A, y):
             log_file.write(f"{l}\n")
 
             if old_l >= l:
-                log.info(f"{theta}")
-                log.info(f"{new_theta}")
-                log.info(f"{old_l}")
-                log.info(f"{l}")
-                log.info(f"likelihood is not increasing anymore")
+                log.info(f"likelihood is not increasing anymore, so stop iterating")
                 break
 
             log.info(f"new theta: {new_theta}")
@@ -258,6 +262,6 @@ if __name__ == "__main__":
     #tmp_theta = batch_gradient_descent(alpha, A, y)
     #print("Batch gradient descent solution: theta = {}" .format(tmp_theta))
 
-    NewtonRaphson(theta, A, y)
-
+    new_theta = NewtonRaphson(A, y)
+    log.info(f"theta: {theta}")
 
