@@ -5,7 +5,7 @@ import pandas as pd
 import logging
 import signal
 
-alpha = 0.1
+alpha = 1.1
 #theta = np.array([-466.60366825, 1355.00942471, -965.20220283])
 theta = np.array([1., 1.])
 
@@ -21,10 +21,16 @@ def print_summary_at_the_end():
     print(h(theta, A[2]))
     print(h(theta, A[3]))
 
+    print("new data: 0.45")
+    print(h(theta, np.array([1., 0.45])))
+    print("new data: 0.55")
+    print(h(theta, np.array([1., 0.55])))
     print("new data: 0.65")
     print(h(theta, np.array([1., 0.65])))
     print("new data: 0.75")
     print(h(theta, np.array([1., 0.75])))
+    print("new data: 0.85")
+    print(h(theta, np.array([1., 0.85])))
 
     sys.exit(0)
 
@@ -156,7 +162,7 @@ def batch_gradient_descent(alpha, A, y):
 
             theta = new_theta.copy()
 
-            #old_likelihood = l
+            old_likelihood = l
             l = log_likelihood(y, theta, A)
             if old_likelihood >= l:
                 log.info("likelihood is not increasing, so stop minimizing process")
@@ -164,6 +170,10 @@ def batch_gradient_descent(alpha, A, y):
 
             log.info(f"new theta: {theta}, likelihood after {counter} iterations: {l}")
             log_file.write(f"{l}\n")
+
+            if counter == 10000:
+                print("stop after 10.000 iterations")
+                break
 
             counter += 1
 
@@ -259,9 +269,11 @@ if __name__ == "__main__":
     for i in range(0, len(theta)):
         assert type(theta[i]) == np.float64
 
-    #tmp_theta = batch_gradient_descent(alpha, A, y)
-    #print("Batch gradient descent solution: theta = {}" .format(tmp_theta))
+    tmp_theta = batch_gradient_descent(alpha, A, y)
+    print("Batch gradient descent solution: theta = {}" .format(tmp_theta))
 
+    print("Now start Newton Raphson method:")
+    theta = np.array([1., 1.])
     new_theta = NewtonRaphson(A, y)
     log.info(f"theta: {theta}")
 
